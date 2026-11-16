@@ -57,10 +57,6 @@ export function AdminPanel() {
     const payload = (await response.json()) as { rosters: RosterEntry[] };
     setRosters(payload.rosters);
     setIsAuthenticated(true);
-
-    if (!selectedRosterId && payload.rosters[0]) {
-      setSelectedRosterId(payload.rosters[0].id);
-    }
   };
 
   useEffect(() => {
@@ -281,7 +277,6 @@ export function AdminPanel() {
   };
 
   const handleSelectRoster = async (rosterId: string) => {
-    setSelectedRosterId(rosterId);
     const response = await fetch("/api/admin/select", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -293,6 +288,7 @@ export function AdminPanel() {
       return;
     }
 
+    setSelectedRosterId(rosterId);
     setMessage(`${rosters.find((roster) => roster.id === rosterId)?.name ?? "출결 항목"}이 키오스크에 적용되었습니다.`);
   };
 
@@ -421,22 +417,27 @@ export function AdminPanel() {
           <div className="admin-section-card rounded-3xl border border-slate-700 bg-slate-900 p-5">
             <h2 className="text-xl font-bold">2. 출결 항목 관리</h2>
             {rosters.length > 0 ? (
-              <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                {rosters.map((roster) => (
-                  <button
-                    key={roster.id}
-                    type="button"
-                    onClick={() => void handleSelectRoster(roster.id)}
-                    className={`rounded-2xl border px-4 py-4 text-left transition ${
-                      selectedRosterId === roster.id
-                        ? "border-cyan-400 bg-cyan-500/15 text-cyan-100"
-                        : "border-slate-700 bg-slate-950 text-slate-100 hover:border-slate-500"
-                    }`}
-                  >
-                    <div className="text-lg font-bold">{roster.name}</div>
-                    <div className="mt-2 text-sm text-slate-400">학생 {roster.students.length}명</div>
-                  </button>
-                ))}
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-slate-400" htmlFor="roster-select">
+                  출결 항목 선택
+                </label>
+                <select
+                  id="roster-select"
+                  value={selectedRosterId ?? ""}
+                  onChange={(event) => {
+                    if (event.target.value) {
+                      void handleSelectRoster(event.target.value);
+                    }
+                  }}
+                  className="admin-roster-select mt-2 w-full rounded-xl border border-slate-600 bg-slate-950 px-4 py-3 text-base text-white"
+                >
+                  <option value="">출결 항목을 선택하세요</option>
+                  {rosters.map((roster) => (
+                    <option key={roster.id} value={roster.id}>
+                      {roster.name} · 학생 {roster.students.length}명
+                    </option>
+                  ))}
+                </select>
               </div>
             ) : (
               <div className="mt-4 rounded-2xl bg-slate-950/60 p-6">
