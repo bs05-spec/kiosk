@@ -284,8 +284,8 @@ export function AdminPanel() {
 
   if (!isAuthenticated) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-white">
-        <div className="w-full max-w-md rounded-3xl border border-slate-700 bg-slate-900 p-8 shadow-2xl">
+      <main className="admin-auth-page flex min-h-screen items-center justify-center bg-slate-950 px-4 text-white">
+        <div className="admin-auth-card w-full max-w-md rounded-3xl border border-slate-700 bg-slate-900 p-8 shadow-2xl">
           <p className="text-xs uppercase tracking-[0.38em] text-cyan-300">Admin access</p>
           <h1 className="mt-3 text-3xl font-bold">관리자 인증</h1>
           <form className="mt-6 space-y-4" onSubmit={handleLogin}>
@@ -314,7 +314,7 @@ export function AdminPanel() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-8 text-white">
+    <main className="admin-dashboard min-h-screen bg-slate-950 px-4 py-8 text-white">
       <div className="mx-auto max-w-7xl space-y-6">
         <header className="flex flex-col gap-3 rounded-3xl border border-slate-700 bg-slate-900 p-6 md:flex-row md:items-center md:justify-between">
           <div>
@@ -331,7 +331,7 @@ export function AdminPanel() {
         </header>
 
         <section className="grid gap-6 lg:grid-cols-[1fr_1.2fr]">
-          <div className="rounded-3xl border border-slate-700 bg-slate-900 p-5">
+          <div className="admin-section-card rounded-3xl border border-slate-700 bg-slate-900 p-5">
             <h2 className="text-xl font-bold">1. 학생 명렬 업로드</h2>
             <div className="mt-4 rounded-2xl border border-dashed border-slate-600 bg-slate-950/60 p-4">
               <input
@@ -373,7 +373,7 @@ export function AdminPanel() {
             ) : null}
           </div>
 
-          <div className="rounded-3xl border border-slate-700 bg-slate-900 p-5">
+          <div className="admin-section-card rounded-3xl border border-slate-700 bg-slate-900 p-5">
             <h2 className="text-xl font-bold">2. 출결 항목 관리</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {rosters.map((roster) => (
@@ -403,7 +403,7 @@ export function AdminPanel() {
           </div>
         </section>
 
-        <section className="rounded-3xl border border-slate-700 bg-slate-900 p-5">
+        <section className="admin-section-card rounded-3xl border border-slate-700 bg-slate-900 p-5">
           <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div>
               <h2 className="text-xl font-bold">3. 날짜별 출결 현황</h2>

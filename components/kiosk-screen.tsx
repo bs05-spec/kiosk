@@ -133,36 +133,36 @@ export function KioskScreen() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-950 px-4 py-6 text-white">
-      <div className="mx-auto flex max-w-6xl flex-col gap-4">
-        <header className="flex items-center justify-between rounded-3xl border border-white/10 bg-slate-900/80 p-5 shadow-2xl">
+    <main className="kiosk-page min-h-screen bg-slate-950 px-5 py-8 text-white md:px-8">
+      <div className="mx-auto flex max-w-5xl flex-col gap-12">
+        <header className="kiosk-header flex items-center justify-between gap-6">
           <div>
-            <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">ATTEND KIOSK</p>
-            <h1 className="mt-2 text-3xl font-bold">학생 출석 등록</h1>
-            <p className="mt-2 text-sm text-slate-600 md:text-base">
+            <p className="kiosk-brand text-xs uppercase tracking-[0.3em] text-cyan-300">ATTEND KIOSK</p>
+            <h1 className="mt-3 text-4xl font-semibold tracking-tight md:text-5xl">학생 출석 등록</h1>
+            <p className="mt-3 text-sm text-slate-600 md:text-base">
               5자리 학번을 입력합니다. (예: 1학년 3반 1번이라면 10301 입력)
             </p>
           </div>
-          <div className="rounded-2xl border border-cyan-400/40 bg-cyan-500/10 px-5 py-3 text-right">
-            <div className="text-xs uppercase tracking-[0.25em] text-cyan-200">Current Date</div>
-            <div className="mt-1 text-lg font-semibold">{formattedTime}</div>
+          <div className="kiosk-clock text-right">
+            <div className="text-xs uppercase tracking-[0.2em] text-slate-400">현재 시간</div>
+            <div className="mt-2 text-base font-semibold tabular-nums md:text-lg">{formattedTime}</div>
           </div>
         </header>
 
-        <section>
-          <div className="rounded-3xl border border-white/10 bg-slate-900 p-5 shadow-2xl">
-            <div className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
+        <section className="w-full">
+          <div className="kiosk-entry mx-auto max-w-3xl rounded-3xl border border-white/10 bg-slate-900 p-6 shadow-2xl md:p-10">
+            <div className="kiosk-roster mb-8 flex items-center justify-between gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-4">
               <div>
-                <p className="text-xs uppercase tracking-[0.3em] text-emerald-200">Selected item</p>
-                <p className="mt-1 text-2xl font-bold text-emerald-100">
+                <p className="text-xs uppercase tracking-[0.2em] text-emerald-200">출결 항목</p>
+                <p className="mt-1 text-lg font-semibold text-emerald-100 md:text-xl">
                   {roster?.name ?? "출결 항목 없음"}
                 </p>
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-700 bg-slate-950/60 px-6 py-6 text-center">
-              <p className="mb-3 text-sm uppercase tracking-[0.35em] text-slate-400">Student No.</p>
-              <div className="flex flex-nowrap justify-center gap-2 whitespace-nowrap text-6xl font-black text-white md:gap-4 md:text-7xl">
+            <div className="kiosk-number-panel rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-8 text-center md:py-10">
+              <p className="mb-5 text-xs uppercase tracking-[0.25em] text-slate-400">학생 번호</p>
+              <div className="flex flex-nowrap justify-center gap-2 whitespace-nowrap text-6xl font-semibold tabular-nums tracking-tight text-white md:gap-5 md:text-7xl">
                 {Array.from({ length: 5 }, (_, index) => (
                   <span key={index} className="w-[1ch] text-center">
                     {input[index] ?? "−"}
@@ -171,19 +171,14 @@ export function KioskScreen() {
               </div>
             </div>
 
-            <div className="mt-5 grid grid-cols-3 gap-3">
+            <div className="mt-6 grid grid-cols-3 gap-3 md:gap-4">
               {keypad.flat().map((value) => (
                 <button
                   key={value}
                   type="button"
                   onClick={() => handleKeyPress(value)}
-                  className={`flex h-20 items-center justify-center rounded-2xl text-3xl font-bold transition-all ${
-                    value === "✓"
-                      ? "bg-emerald-500 text-white hover:bg-emerald-400"
-                      : value === "C"
-                        ? "bg-slate-700 text-white hover:bg-slate-600"
-                        : "bg-slate-800 text-white hover:bg-slate-700"
-                  }`}
+                  data-action={value === "✓" ? "confirm" : value === "C" ? "clear" : "digit"}
+                  className="kiosk-key flex h-16 items-center justify-center rounded-2xl text-2xl font-semibold md:h-20 md:text-3xl"
                 >
                   {value}
                 </button>
@@ -192,11 +187,8 @@ export function KioskScreen() {
             {messageTone !== "neutral" ? (
               <p
                 aria-live="polite"
-                className={`mt-4 rounded-xl px-4 py-3 text-center font-semibold ${
-                  messageTone === "success"
-                    ? "bg-emerald-500/10 text-emerald-700"
-                    : "bg-red-500/10 text-red-700"
-                }`}
+                data-tone={messageTone}
+                className="kiosk-feedback mt-4 rounded-xl px-4 py-3 text-center font-semibold"
               >
                 {message}
               </p>
