@@ -200,7 +200,8 @@ input:focus-visible {
 
 .kiosk-header {
   align-items: flex-start;
-  padding: 8px 4px;
+  padding: 8px 4px 24px;
+  border-bottom: 1px solid var(--border);
 }
 
 .kiosk-brand {
@@ -229,7 +230,7 @@ input:focus-visible {
 .kiosk-roster {
   border: 0 !important;
   border-radius: 16px !important;
-  background: #f5f5f7 !important;
+  background: #eff6ff !important;
 }
 
 .kiosk-roster p:first-child {
@@ -237,7 +238,7 @@ input:focus-visible {
 }
 
 .kiosk-roster p:last-child {
-  color: #1d1d1f !important;
+  color: #0866cf !important;
 }
 
 .kiosk-number-panel {
@@ -273,13 +274,13 @@ input:focus-visible {
 }
 
 .kiosk-key[data-action="confirm"] {
-  background: #1d1d1f !important;
-  border-color: #1d1d1f;
+  background: var(--accent) !important;
+  border-color: var(--accent);
   color: #fff !important;
 }
 
 .kiosk-key[data-action="confirm"]:hover {
-  background: #3a3a3c !important;
+  background: #0866cf !important;
 }
 
 .kiosk-feedback[data-tone="success"] {
@@ -336,6 +337,7 @@ input:focus-visible {
   .kiosk-header {
     flex-direction: column;
     gap: 16px;
+    padding-bottom: 20px;
   }
 
   .kiosk-clock {

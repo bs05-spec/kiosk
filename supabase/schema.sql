@@ -106,3 +106,5 @@ grant execute on function public.upsert_roster_with_students(text, jsonb)
 alter table public.rosters enable row level security;
 alter table public.students enable row level security;
 alter table public.attendance_records enable row level security;
+
+notify pgrst, 'reload schema';

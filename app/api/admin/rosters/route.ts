@@ -52,6 +52,31 @@ export async function POST(request: Request) {
     seen.add(student.studentNumber);
   }
 
-  const roster = await upsertRosterByName(name, cleanedStudents);
-  return NextResponse.json({ ok: true, roster });
+  if (cleanedStudents.length === 0) {
+    return NextResponse.json(
+      { ok: false, message: "저장할 학생 데이터가 없습니다. 엑셀 명단을 확인해 주세요." },
+      { status: 400 },
+    );
+  }
+
+  try {
+    const roster = await upsertRosterByName(name, cleanedStudents);
+    return NextResponse.json({ ok: true, roster });
+  } catch (error) {
+    console.error("Roster upload failed:", error);
+    const details = error instanceof Error ? error.message : String(error);
+    const missingFunction =
+      details.includes("PGRST202") ||
+      details.includes("Could not find the function public.upsert_roster_with_students");
+
+    return NextResponse.json(
+      {
+        ok: false,
+        message: missingFunction
+          ? "Supabase에 명단 저장 함수가 없습니다. 최신 supabase/schema.sql을 SQL Editor에서 다시 실행해 주세요."
+          : "명단 저장 중 오류가 발생했습니다. 서버 로그를 확인해 주세요.",
+      },
+      { status: 500 },
+    );
+  }
 }

@@ -166,57 +166,74 @@ export function AdminPanel() {
       return;
     }
 
-    const arrayBuffer = await file.arrayBuffer();
-    const workbook = XLSX.read(arrayBuffer, { type: "array" });
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json<Record<string, string | number>>(sheet, {
-      defval: "",
-      raw: false,
-    });
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const workbook = XLSX.read(arrayBuffer, { type: "array" });
+      const firstSheetName = workbook.SheetNames[0];
+      if (!firstSheetName) {
+        setPreviewRows([]);
+        setValidationErrors(["엑셀 파일에 시트가 없습니다."]);
+        return;
+      }
 
-    const normalizedHeaders = Object.keys(rows[0] ?? {}).map((key) => key.trim());
-    const studentNumberKey = normalizedHeaders.find((key) => key.includes("학번"));
-    const studentNameKey = normalizedHeaders.find((key) => key.includes("이름"));
+      const sheet = workbook.Sheets[firstSheetName];
+      const rows = XLSX.utils.sheet_to_json<Record<string, string | number>>(sheet, {
+        defval: "",
+        raw: false,
+      });
 
-    if (!studentNumberKey || !studentNameKey) {
+      const headerKeys = Object.keys(rows[0] ?? {});
+      const studentNumberKey = headerKeys.find((key) => key.trim().includes("학번"));
+      const studentNameKey = headerKeys.find((key) => key.trim().includes("이름"));
+
+      if (!studentNumberKey || !studentNameKey) {
+        setPreviewRows([]);
+        setValidationErrors(["엑셀 파일에는 '학번'과 '이름' 컬럼이 꼭 있어야 합니다."]);
+        return;
+      }
+
+      const validRows: StudentRow[] = [];
+      const errors: string[] = [];
+
+      rows.forEach((row, index) => {
+        const rawStudentNumber = String(row[studentNumberKey] ?? "").trim();
+        const rawName = String(row[studentNameKey] ?? "").trim();
+
+        if (!rawStudentNumber && !rawName) {
+          return;
+        }
+
+        const normalizedNumber = rawStudentNumber.replace(/[^0-9]/g, "");
+        if (!/^\d{5}$/.test(normalizedNumber)) {
+          errors.push(`${index + 2}행: 학번은 5자리 숫자여야 합니다.`);
+          return;
+        }
+
+        const name = rawName.replace(/\s+/g, " ");
+        if (!name) {
+          errors.push(`${index + 2}행: 이름을 확인해 주세요.`);
+          return;
+        }
+
+        if (validRows.some((student) => student.studentNumber === normalizedNumber)) {
+          errors.push(`${index + 2}행: 학번이 중복됩니다 (${normalizedNumber}).`);
+          return;
+        }
+
+        validRows.push({ studentNumber: normalizedNumber, name });
+      });
+
+      if (validRows.length === 0 && errors.length === 0) {
+        errors.push("엑셀 파일에서 저장할 학생 데이터를 찾지 못했습니다.");
+      }
+
+      setPreviewRows(validRows);
+      setValidationErrors(errors);
+    } catch (error) {
+      console.error("Roster file parsing failed:", error);
       setPreviewRows([]);
-      setValidationErrors(["엑셀 파일에는 '학번'과 '이름' 컬럼이 꼭 있어야 합니다."]);
-      return;
+      setValidationErrors(["파일을 읽지 못했습니다. 엑셀 파일 형식을 확인해 주세요."]);
     }
-
-    const validRows: StudentRow[] = [];
-    const errors: string[] = [];
-
-    rows.forEach((row, index) => {
-      const rawStudentNumber = String(row[studentNumberKey] ?? "").trim();
-      const rawName = String(row[studentNameKey] ?? "").trim();
-
-      if (!rawStudentNumber && !rawName) {
-        return;
-      }
-
-      const normalizedNumber = rawStudentNumber.replace(/[^0-9]/g, "");
-      if (!/^\d{5}$/.test(normalizedNumber)) {
-        errors.push(`${index + 2}행: 학번은 5자리 숫자여야 합니다.`);
-        return;
-      }
-
-      const name = rawName.replace(/\s+/g, " ");
-      if (!name) {
-        errors.push(`${index + 2}행: 이름을 확인해 주세요.`);
-        return;
-      }
-
-      if (validRows.some((student) => student.studentNumber === normalizedNumber)) {
-        errors.push(`${index + 2}행: 학번이 중복됩니다 (${normalizedNumber}).`);
-        return;
-      }
-
-      validRows.push({ studentNumber: normalizedNumber, name });
-    });
-
-    setPreviewRows(validRows);
-    setValidationErrors(errors);
   };
 
   const saveRoster = async () => {
@@ -230,24 +247,37 @@ export function AdminPanel() {
       ? fileInput.value.split("\\").at(-1)?.replace(/\.[^.]+$/, "") ?? "새 출결 항목"
       : "새 출결 항목";
 
-    const response = await fetch("/api/admin/rosters", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: rosterName, students: previewRows }),
-    });
+    setBusy(true);
+    try {
+      const response = await fetch("/api/admin/rosters", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: rosterName, students: previewRows }),
+      });
 
-    const payload = (await response.json()) as { ok: boolean; message?: string; roster?: RosterEntry };
-    if (!response.ok || !payload.ok) {
-      setMessage(payload.message ?? "저장에 실패했습니다.");
-      return;
+      const payload = (await response.json()) as {
+        ok: boolean;
+        message?: string;
+        roster?: RosterEntry;
+      };
+      if (!response.ok || !payload.ok) {
+        setMessage(payload.message ?? "저장에 실패했습니다.");
+        return;
+      }
+
+      setMessage(`${payload.roster?.name ?? rosterName} 출결 항목이 저장되었습니다.`);
+      setPreviewRows([]);
+      if (fileInput) {
+        fileInput.value = "";
+      }
+      await loadRosters();
+    } catch (error) {
+      console.error("Roster upload request failed:", error);
+      setMessage("명단을 저장하지 못했습니다. 연결 상태와 서버 설정을 확인해 주세요.");
+    } finally {
+      setBusy(false);
     }
 
-    setMessage(`${payload.roster?.name ?? rosterName} 출결 항목이 저장되었습니다.`);
-    setPreviewRows([]);
-    if (fileInput) {
-      fileInput.value = "";
-    }
-    await loadRosters();
   };
 
   const handleSelectRoster = async (rosterId: string) => {
@@ -371,9 +401,10 @@ export function AdminPanel() {
                 <button
                   type="button"
                   onClick={saveRoster}
-                  className="mt-4 w-full rounded-xl bg-emerald-500 px-4 py-3 font-bold text-slate-950 hover:bg-emerald-400"
+                  disabled={busy}
+                  className="mt-4 w-full rounded-xl bg-emerald-500 px-4 py-3 font-bold text-slate-950 hover:bg-emerald-400 disabled:opacity-65"
                 >
-                  최종 저장
+                  {busy ? "저장 중..." : "최종 저장"}
                 </button>
               </div>
             ) : null}
@@ -389,23 +420,39 @@ export function AdminPanel() {
 
           <div className="admin-section-card rounded-3xl border border-slate-700 bg-slate-900 p-5">
             <h2 className="text-xl font-bold">2. 출결 항목 관리</h2>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {rosters.map((roster) => (
+            {rosters.length > 0 ? (
+              <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                {rosters.map((roster) => (
+                  <button
+                    key={roster.id}
+                    type="button"
+                    onClick={() => void handleSelectRoster(roster.id)}
+                    className={`rounded-2xl border px-4 py-4 text-left transition ${
+                      selectedRosterId === roster.id
+                        ? "border-cyan-400 bg-cyan-500/15 text-cyan-100"
+                        : "border-slate-700 bg-slate-950 text-slate-100 hover:border-slate-500"
+                    }`}
+                  >
+                    <div className="text-lg font-bold">{roster.name}</div>
+                    <div className="mt-2 text-sm text-slate-400">학생 {roster.students.length}명</div>
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <div className="mt-4 rounded-2xl bg-slate-950/60 p-6">
+                <p className="font-semibold">등록된 출결 항목이 없습니다.</p>
+                <p className="mt-2 text-sm text-slate-400">
+                  학생 명단 파일을 업로드하고 최종 저장하면 여기에서 선택할 수 있습니다.
+                </p>
                 <button
-                  key={roster.id}
                   type="button"
-                  onClick={() => void handleSelectRoster(roster.id)}
-                  className={`rounded-2xl border px-4 py-4 text-left transition ${
-                    selectedRosterId === roster.id
-                      ? "border-cyan-400 bg-cyan-500/15 text-cyan-100"
-                      : "border-slate-700 bg-slate-950 text-slate-100 hover:border-slate-500"
-                  }`}
+                  onClick={() => document.getElementById("excel-file")?.click()}
+                  className="mt-4 rounded-xl bg-cyan-500 px-4 py-2 font-semibold text-slate-950 hover:bg-cyan-400"
                 >
-                  <div className="text-lg font-bold">{roster.name}</div>
-                  <div className="mt-2 text-sm text-slate-400">학생 {roster.students.length}명</div>
+                  명단 파일 선택
                 </button>
-              ))}
-            </div>
+              </div>
+            )}
 
             {currentRosterName ? (
               <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-950/60 p-4">
