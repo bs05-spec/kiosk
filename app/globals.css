@@ -295,11 +295,12 @@ input:focus-visible {
 }
 
 .kiosk-admin-link {
-  color: #a1a1a6 !important;
+  color: var(--background) !important;
 }
 
 .kiosk-admin-link:hover {
-  color: #6e6e73 !important;
+  color: #fff !important;
+  text-shadow: 0 1px 3px rgb(0 0 0 / 45%);
 }
 
 .admin-auth-card {
