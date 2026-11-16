@@ -182,10 +182,10 @@ export function KioskScreen() {
                   type="button"
                   onClick={() => handleKeyPress(value)}
                   data-action={value === "✓" ? "confirm" : value === "C" ? "clear" : "digit"}
-                  className="kiosk-key flex h-32 items-center justify-center rounded-2xl text-5xl font-semibold md:h-40 md:text-6xl"
+                  className="kiosk-key flex h-16 items-center justify-center rounded-2xl text-5xl font-semibold md:h-20 md:text-6xl"
                 >
                   {value === "C" ? (
-                    <span className="text-xl md:text-2xl">지우기</span>
+                    <span className="text-3xl tracking-tight md:text-5xl">지우기</span>
                   ) : (
                     value
                   )}
