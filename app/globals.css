@@ -1,0 +1,143 @@
+@import "tailwindcss";
+
+:root {
+  --background: #eef1f5;
+  --foreground: #111827;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-noto-sans);
+  --font-mono: var(--font-noto-sans);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--background);
+}
+
+body {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-noto-sans), "Noto Sans KR", sans-serif;
+}
+
+button,
+input {
+  font: inherit;
+}
+
+[class~="bg-slate-950"] {
+  background-color: #eef1f5 !important;
+}
+
+[class~="bg-slate-950/60"] {
+  background-color: #f3f5f8 !important;
+}
+
+[class~="bg-slate-900"],
+[class~="bg-slate-900/80"] {
+  background-color: #fbfcfe !important;
+}
+
+[class~="bg-slate-800"],
+[class~="bg-slate-800/60"] {
+  background-color: #e2e8f0 !important;
+}
+
+[class~="bg-slate-700"] {
+  background-color: #cbd5e1 !important;
+}
+
+[class~="bg-slate-600"] {
+  background-color: #b8c4d3 !important;
+}
+
+[class~="bg-cyan-500"] {
+  background-color: #1e3a5f !important;
+}
+
+[class~="bg-cyan-500/10"],
+[class~="bg-cyan-500/15"],
+[class~="bg-cyan-500/20"] {
+  background-color: rgb(30 58 95 / 8%) !important;
+}
+
+[class~="bg-cyan-400"]:hover,
+[class~="bg-cyan-500"]:hover {
+  background-color: #162d4d !important;
+}
+
+[class~="text-white"],
+[class~="text-slate-100"] {
+  color: #111827 !important;
+}
+
+[class~="text-slate-200"],
+[class~="text-slate-300"] {
+  color: #263449 !important;
+}
+
+[class~="text-slate-400"] {
+  color: #526176 !important;
+}
+
+[class~="text-slate-950"] {
+  color: #fff !important;
+}
+
+[class~="text-cyan-100"],
+[class~="text-cyan-200"],
+[class~="text-cyan-300"] {
+  color: #1e3a5f !important;
+}
+
+[class~="text-emerald-100"],
+[class~="text-emerald-200"],
+[class~="text-emerald-300"] {
+  color: #1e3a5f !important;
+}
+
+[class~="text-red-200"],
+[class~="text-red-300"] {
+  color: #991b1b !important;
+}
+
+[class~="text-amber-300"] {
+  color: #92400e !important;
+}
+
+[class~="text-violet-200"] {
+  color: #334e73 !important;
+}
+
+[class~="border-white/10"],
+[class~="border-slate-700"],
+[class~="border-slate-600"] {
+  border-color: #cbd3df !important;
+}
+
+[class~="border-slate-800"] {
+  border-color: #dce2ea !important;
+}
+
+[class~="border-cyan-400/40"],
+[class~="border-cyan-400"],
+[class~="border-cyan-500"] {
+  border-color: #8da3bf !important;
+}
+
+[class~="hover:border-slate-500"]:hover {
+  border-color: #8293aa !important;
+}
+
+[class~="file:bg-cyan-500"]::file-selector-button {
+  background-color: #1e3a5f !important;
+  color: #fff !important;
+}
+
