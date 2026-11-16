@@ -1,8 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  --background: #eef1f5;
-  --foreground: #111827;
+  --background: #f5f5f7;
+  --foreground: #1d1d1f;
+  --accent: #1677e8;
+  --surface: #ffffff;
+  --border: #e4e5e9;
 }
 
 @theme inline {
@@ -24,7 +27,9 @@ body {
   min-height: 100vh;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-noto-sans), "Noto Sans KR", sans-serif;
+  font-family: var(--font-noto-sans), "Noto Sans KR", -apple-system,
+    BlinkMacSystemFont, "Malgun Gothic", sans-serif;
+  letter-spacing: -0.015em;
 }
 
 button,
@@ -32,59 +37,87 @@ input {
   font: inherit;
 }
 
+button {
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+button:active {
+  transform: scale(0.985);
+}
+
+button:focus-visible,
+input:focus-visible {
+  outline: 3px solid rgb(22 119 232 / 35%);
+  outline-offset: 2px;
+}
+
 [class~="bg-slate-950"] {
-  background-color: #eef1f5 !important;
+  background-color: var(--background) !important;
 }
 
 [class~="bg-slate-950/60"] {
-  background-color: #f3f5f8 !important;
+  background-color: #f8f8fa !important;
 }
 
 [class~="bg-slate-900"],
 [class~="bg-slate-900/80"] {
-  background-color: #fbfcfe !important;
+  background-color: var(--surface) !important;
 }
 
 [class~="bg-slate-800"],
 [class~="bg-slate-800/60"] {
-  background-color: #e2e8f0 !important;
+  background-color: #f0f0f2 !important;
 }
 
 [class~="bg-slate-700"] {
-  background-color: #cbd5e1 !important;
+  background-color: #e6e6e9 !important;
 }
 
 [class~="bg-slate-600"] {
-  background-color: #b8c4d3 !important;
+  background-color: #d8d8dc !important;
 }
 
 [class~="bg-cyan-500"] {
-  background-color: #1e3a5f !important;
+  background-color: var(--accent) !important;
 }
 
 [class~="bg-cyan-500/10"],
 [class~="bg-cyan-500/15"],
 [class~="bg-cyan-500/20"] {
-  background-color: rgb(30 58 95 / 8%) !important;
+  background-color: rgb(22 119 232 / 8%) !important;
 }
 
 [class~="bg-cyan-400"]:hover,
 [class~="bg-cyan-500"]:hover {
-  background-color: #162d4d !important;
+  background-color: #0866cf !important;
+}
+
+[class~="bg-emerald-500"] {
+  background-color: #16834a !important;
+}
+
+[class~="bg-emerald-400"]:hover,
+[class~="bg-emerald-500"]:hover {
+  background-color: #0e6f3b !important;
 }
 
 [class~="text-white"],
 [class~="text-slate-100"] {
-  color: #111827 !important;
+  color: var(--foreground) !important;
 }
 
 [class~="text-slate-200"],
 [class~="text-slate-300"] {
-  color: #263449 !important;
+  color: #3b3b40 !important;
 }
 
 [class~="text-slate-400"] {
-  color: #526176 !important;
+  color: #6e6e73 !important;
 }
 
 [class~="text-slate-950"] {
@@ -94,13 +127,13 @@ input {
 [class~="text-cyan-100"],
 [class~="text-cyan-200"],
 [class~="text-cyan-300"] {
-  color: #1e3a5f !important;
+  color: #0866cf !important;
 }
 
 [class~="text-emerald-100"],
 [class~="text-emerald-200"],
 [class~="text-emerald-300"] {
-  color: #1e3a5f !important;
+  color: #167744 !important;
 }
 
 [class~="text-red-200"],
@@ -113,31 +146,47 @@ input {
 }
 
 [class~="text-violet-200"] {
-  color: #334e73 !important;
+  color: #4b4b50 !important;
 }
 
 [class~="border-white/10"],
 [class~="border-slate-700"],
 [class~="border-slate-600"] {
-  border-color: #cbd3df !important;
+  border-color: var(--border) !important;
 }
 
 [class~="border-slate-800"] {
-  border-color: #dce2ea !important;
+  border-color: #ededf0 !important;
 }
 
 [class~="border-cyan-400/40"],
 [class~="border-cyan-400"],
 [class~="border-cyan-500"] {
-  border-color: #8da3bf !important;
+  border-color: rgb(22 119 232 / 26%) !important;
 }
 
 [class~="hover:border-slate-500"]:hover {
-  border-color: #8293aa !important;
+  border-color: #b7b7bd !important;
 }
 
 [class~="file:bg-cyan-500"]::file-selector-button {
-  background-color: #1e3a5f !important;
+  background-color: var(--accent) !important;
   color: #fff !important;
+}
+
+[class~="rounded-3xl"] {
+  border-radius: 28px !important;
+}
+
+[class~="rounded-2xl"] {
+  border-radius: 20px !important;
+}
+
+[class~="rounded-xl"] {
+  border-radius: 14px !important;
+}
+
+[class~="shadow-2xl"] {
+  box-shadow: 0 12px 40px rgb(0 0 0 / 6%) !important;
 }
 
