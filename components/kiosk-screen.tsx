@@ -185,7 +185,7 @@ export function KioskScreen() {
                   className="kiosk-key flex h-16 items-center justify-center rounded-2xl text-5xl font-semibold md:h-20 md:text-6xl"
                 >
                   {value === "C" ? (
-                    <span className="text-xl tracking-tight md:text-[2rem]">지우기</span>
+                    <span className="text-[0.833rem] tracking-tight md:text-[1.333rem]">지우기</span>
                   ) : (
                     value
                   )}
