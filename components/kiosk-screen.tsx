@@ -122,7 +122,7 @@ export function KioskScreen() {
     }
 
     setMessage(
-      `${payload.studentName ?? "학생"}(${payload.studentNumber}) 출석 완료`,
+      `${payload.studentName ?? "학생"}(${payload.studentNumber}) 출결이 완료되었습니다.`,
     );
     setMessageTone("success");
     setInput("");
@@ -161,8 +161,8 @@ export function KioskScreen() {
               </div>
             </div>
 
-            <div className="kiosk-number-panel rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-8 text-center md:py-10">
-              <p className="mb-5 text-xs uppercase tracking-[0.25em] text-slate-400">학생 번호</p>
+            <div className="kiosk-number-panel rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-1 text-center md:py-2">
+              <p className="mb-2 text-xs uppercase tracking-[0.25em] text-slate-400">학생 번호</p>
               <div className="flex flex-nowrap justify-center gap-2 whitespace-nowrap text-6xl font-semibold tabular-nums tracking-tight text-white md:gap-5 md:text-7xl">
                 {Array.from({ length: 5 }, (_, index) => (
                   <span key={index} className="w-[1ch] text-center">
@@ -189,7 +189,9 @@ export function KioskScreen() {
               <p
                 aria-live="polite"
                 data-tone={messageTone}
-                className="kiosk-feedback mt-4 rounded-xl px-4 py-3 text-center font-semibold"
+                className={`kiosk-feedback mt-4 rounded-xl px-4 py-3 text-center font-semibold ${
+                  messageTone === "success" ? "text-[2rem]" : "text-base"
+                }`}
               >
                 {message}
               </p>
