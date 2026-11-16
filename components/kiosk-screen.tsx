@@ -149,7 +149,7 @@ export function KioskScreen() {
           </div>
         </header>
 
-        <section className="grid gap-5 lg:grid-cols-[1.1fr_0.9fr]">
+        <section>
           <div className="rounded-3xl border border-white/10 bg-slate-900 p-5 shadow-2xl">
             <div className="mb-5 flex items-center justify-between gap-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3">
               <div>
@@ -189,23 +189,19 @@ export function KioskScreen() {
                 </button>
               ))}
             </div>
+            {messageTone !== "neutral" ? (
+              <p
+                aria-live="polite"
+                className={`mt-4 rounded-xl px-4 py-3 text-center font-semibold ${
+                  messageTone === "success"
+                    ? "bg-emerald-500/10 text-emerald-700"
+                    : "bg-red-500/10 text-red-700"
+                }`}
+              >
+                {message}
+              </p>
+            ) : null}
           </div>
-
-          <aside className="rounded-3xl border border-white/10 bg-slate-900 p-5 shadow-2xl">
-            <p className="text-xs uppercase tracking-[0.35em] text-violet-200">Status</p>
-            <div
-              className={`mt-4 rounded-2xl border px-5 py-6 text-2xl font-bold ${
-                messageTone === "success"
-                  ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-200"
-                  : messageTone === "error"
-                    ? "border-red-500/40 bg-red-500/10 text-red-200"
-                    : "border-slate-700 bg-slate-800/60 text-slate-100"
-              }`}
-            >
-              {message}
-            </div>
-
-          </aside>
         </section>
       </div>
     </main>
