@@ -18,10 +18,20 @@ type RosterEntry = {
 
 type DailySummary = {
   rosterName: string;
-  present: StudentRow[];
+  present: Array<StudentRow & { markedAt: string }>;
   absent: StudentRow[];
   attendanceRate: number;
 };
+
+function formatAttendanceTime(timestamp: string) {
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(new Date(timestamp));
+}
 
 export function AdminPanel() {
   const [password, setPassword] = useState("");
@@ -292,6 +302,42 @@ export function AdminPanel() {
     setMessage(`${rosters.find((roster) => roster.id === rosterId)?.name ?? "출결 항목"}이 키오스크에 적용되었습니다.`);
   };
 
+  const handleDeleteRoster = async () => {
+    if (!selectedRosterId) {
+      return;
+    }
+
+    const roster = rosters.find((item) => item.id === selectedRosterId);
+    if (!roster || !window.confirm(`"${roster.name}" 명단과 출석 기록을 모두 삭제할까요? 이 작업은 되돌릴 수 없습니다.`)) {
+      return;
+    }
+
+    setBusy(true);
+    try {
+      const response = await fetch("/api/admin/rosters", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rosterId: roster.id }),
+      });
+      const payload = (await response.json()) as { ok: boolean; message?: string };
+
+      if (!response.ok || !payload.ok) {
+        setMessage(payload.message ?? "출결 항목 삭제에 실패했습니다.");
+        return;
+      }
+
+      setRosters((current) => current.filter((item) => item.id !== roster.id));
+      setSelectedRosterId(null);
+      setSummary(null);
+      setMessage(`${roster.name} 명단과 출석 기록을 삭제했습니다.`);
+    } catch (error) {
+      console.error("Roster deletion request failed:", error);
+      setMessage("출결 항목을 삭제하지 못했습니다. 연결 상태를 확인해 주세요.");
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const exportSummary = async () => {
     if (!selectedRosterId) {
       return;
@@ -309,10 +355,20 @@ export function AdminPanel() {
 
     const payload = (await response.json()) as { summary: DailySummary };
     const rows = [
-      { 상태: "출석", 학번: "", 이름: "" },
-      ...payload.summary.present.map((student) => ({ 상태: "출석", 학번: student.studentNumber, 이름: student.name })),
-      { 상태: "결석", 학번: "", 이름: "" },
-      ...payload.summary.absent.map((student) => ({ 상태: "결석", 학번: student.studentNumber, 이름: student.name })),
+      { 상태: "출석", 학번: "", 이름: "", 출석시간: "" },
+      ...payload.summary.present.map((student) => ({
+        상태: "출석",
+        학번: student.studentNumber,
+        이름: student.name,
+        출석시간: formatAttendanceTime(student.markedAt),
+      })),
+      { 상태: "결석", 학번: "", 이름: "", 출석시간: "" },
+      ...payload.summary.absent.map((student) => ({
+        상태: "결석",
+        학번: student.studentNumber,
+        이름: student.name,
+        출석시간: "",
+      })),
     ];
 
     const workbook = XLSX.utils.book_new();
@@ -417,27 +473,37 @@ export function AdminPanel() {
           <div className="admin-section-card rounded-3xl border border-slate-700 bg-slate-900 p-5">
             <h2 className="text-xl font-bold">2. 출결 항목 관리</h2>
             {rosters.length > 0 ? (
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-slate-400" htmlFor="roster-select">
-                  출결 항목 선택
-                </label>
-                <select
-                  id="roster-select"
-                  value={selectedRosterId ?? ""}
-                  onChange={(event) => {
-                    if (event.target.value) {
-                      void handleSelectRoster(event.target.value);
-                    }
-                  }}
-                  className="admin-roster-select mt-2 w-full rounded-xl border border-slate-600 bg-slate-950 px-4 py-3 text-base text-white"
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-slate-400" htmlFor="roster-select">
+                    출결 항목 선택
+                  </label>
+                  <select
+                    id="roster-select"
+                    value={selectedRosterId ?? ""}
+                    onChange={(event) => {
+                      if (event.target.value) {
+                        void handleSelectRoster(event.target.value);
+                      }
+                    }}
+                    className="admin-roster-select mt-2 w-full rounded-xl border border-slate-600 bg-slate-950 px-4 py-3 text-base text-white"
+                  >
+                    <option value="">출결 항목을 선택하세요</option>
+                    {rosters.map((roster) => (
+                      <option key={roster.id} value={roster.id}>
+                        {roster.name} · 학생 {roster.students.length}명
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void handleDeleteRoster()}
+                  disabled={!selectedRosterId || busy}
+                  className="rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-semibold text-red-700 hover:bg-red-500/15 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <option value="">출결 항목을 선택하세요</option>
-                  {rosters.map((roster) => (
-                    <option key={roster.id} value={roster.id}>
-                      {roster.name} · 학생 {roster.students.length}명
-                    </option>
-                  ))}
-                </select>
+                  선택한 명단 삭제
+                </button>
               </div>
             ) : (
               <div className="mt-4 rounded-2xl bg-slate-950/60 p-6">
@@ -512,9 +578,12 @@ export function AdminPanel() {
                   <div className="mt-3 space-y-2 text-sm text-slate-200">
                     {summary.present.length > 0 ? (
                       summary.present.map((student) => (
-                        <div key={`${student.studentNumber}-present`} className="flex justify-between gap-3 border-b border-slate-800 py-2">
+                        <div key={`${student.studentNumber}-present`} className="grid grid-cols-[auto_1fr_auto] gap-3 border-b border-slate-800 py-2">
                           <span>{student.studentNumber}</span>
-                          <span>{student.name}</span>
+                          <span className="text-right">{student.name}</span>
+                          <time className="text-slate-400" dateTime={student.markedAt}>
+                            {formatAttendanceTime(student.markedAt)}
+                          </time>
                         </div>
                       ))
                     ) : (

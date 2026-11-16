@@ -46,6 +46,13 @@ type DatabaseAttendance = {
   marked_at: string;
 };
 
+export type DailySummary = {
+  rosterName: string;
+  present: Array<StudentRow & { markedAt: string }>;
+  absent: StudentRow[];
+  attendanceRate: number;
+};
+
 function getDatabase() {
   const database = getSupabaseServerClient();
   if (!database) {
@@ -113,7 +120,10 @@ export async function getRosterById(rosterId: string): Promise<RosterRecord | nu
   return data ? toRoster(data as DatabaseRoster) : null;
 }
 
-export async function getDailySummary(rosterId: string, date: string) {
+export async function getDailySummary(
+  rosterId: string,
+  date: string,
+): Promise<DailySummary | null> {
   const roster = await getRosterById(rosterId);
   if (!roster) {
     return null;
@@ -121,7 +131,7 @@ export async function getDailySummary(rosterId: string, date: string) {
 
   const { data, error } = await getDatabase()
     .from("attendance_records")
-    .select("student_number")
+    .select("student_number,marked_at")
     .eq("roster_id", rosterId)
     .eq("attendance_date", date)
     .eq("status", "present");
@@ -130,16 +140,17 @@ export async function getDailySummary(rosterId: string, date: string) {
     throwDatabaseError("attendance summary", error.message);
   }
 
-  const presentNumbers = new Set(
-    ((data ?? []) as Array<{ student_number: string }>).map(
-      (record) => record.student_number,
+  const presentTimes = new Map(
+    ((data ?? []) as Array<{ student_number: string; marked_at: string }>).map(
+      (record) => [record.student_number, record.marked_at],
     ),
   );
-  const present = roster.students.filter((student) =>
-    presentNumbers.has(student.studentNumber),
-  );
+  const present = roster.students.flatMap((student) => {
+    const markedAt = presentTimes.get(student.studentNumber);
+    return markedAt ? [{ ...student, markedAt }] : [];
+  });
   const absent = roster.students.filter(
-    (student) => !presentNumbers.has(student.studentNumber),
+    (student) => !presentTimes.has(student.studentNumber),
   );
 
   return {
@@ -151,6 +162,21 @@ export async function getDailySummary(rosterId: string, date: string) {
         ? 0
         : Number(((present.length / roster.students.length) * 100).toFixed(1)),
   };
+}
+
+export async function deleteRosterById(rosterId: string): Promise<boolean> {
+  const { data, error } = await getDatabase()
+    .from("rosters")
+    .delete()
+    .eq("id", rosterId)
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    throwDatabaseError("roster deletion", error.message);
+  }
+
+  return Boolean(data);
 }
 
 export async function markAttendanceForStudent(

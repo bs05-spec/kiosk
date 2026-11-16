@@ -1,7 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { isAdminAuthenticated } from "@/lib/session";
-import { listRosters, upsertRosterByName } from "@/lib/storage";
+import {
+  clearSelectedRosterId,
+  getSelectedRosterId,
+  isAdminAuthenticated,
+} from "@/lib/session";
+import { deleteRosterById, listRosters, upsertRosterByName } from "@/lib/storage";
 
 export async function GET() {
   if (!(await isAdminAuthenticated())) {
@@ -76,6 +80,43 @@ export async function POST(request: Request) {
           ? "Supabase에 명단 저장 함수가 없습니다. 최신 supabase/schema.sql을 SQL Editor에서 다시 실행해 주세요."
           : "명단 저장 중 오류가 발생했습니다. 서버 로그를 확인해 주세요.",
       },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  if (!(await isAdminAuthenticated())) {
+    return NextResponse.json({ ok: false, message: "관리자 인증이 필요합니다." }, { status: 401 });
+  }
+
+  let rosterId = "";
+  try {
+    const body = (await request.json()) as { rosterId?: string };
+    rosterId = String(body.rosterId ?? "").trim();
+  } catch {
+    return NextResponse.json({ ok: false, message: "삭제할 출결 항목을 선택해 주세요." }, { status: 400 });
+  }
+
+  if (!rosterId) {
+    return NextResponse.json({ ok: false, message: "삭제할 출결 항목을 선택해 주세요." }, { status: 400 });
+  }
+
+  try {
+    const deleted = await deleteRosterById(rosterId);
+    if (!deleted) {
+      return NextResponse.json({ ok: false, message: "출결 항목을 찾을 수 없습니다." }, { status: 404 });
+    }
+
+    if ((await getSelectedRosterId()) === rosterId) {
+      await clearSelectedRosterId();
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error("Roster deletion failed:", error);
+    return NextResponse.json(
+      { ok: false, message: "출결 항목 삭제 중 오류가 발생했습니다." },
       { status: 500 },
     );
   }
