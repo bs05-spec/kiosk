@@ -34,6 +34,7 @@ export function AdminPanel() {
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [summary, setSummary] = useState<DailySummary | null>(null);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
 
   const currentRosterName = useMemo(
     () => rosters.find((item) => item.id === selectedRosterId)?.name ?? "",
@@ -68,30 +69,38 @@ export function AdminPanel() {
   }, []);
 
   useEffect(() => {
-    const syncRosters = async () => {
-      const response = await fetch("/api/admin/rosters", { cache: "no-store" });
-      if (response.status === 401) {
+    const resetAdminVisit = async () => {
+      try {
+        const response = await fetch("/api/admin/visit", { method: "POST" });
+        if (!response.ok) {
+          setMessage("관리자 인증 상태를 초기화하지 못했습니다. 페이지를 새로고침해 주세요.");
+        }
+      } catch {
+        setMessage("관리자 인증 상태를 초기화하지 못했습니다. 페이지를 새로고침해 주세요.");
+      } finally {
         setIsAuthenticated(false);
-        setMessage("관리자 인증이 필요합니다.");
-        return;
-      }
-
-      if (!response.ok) {
-        setMessage("출결 목록을 불러오지 못했습니다.");
-        return;
-      }
-
-      const payload = (await response.json()) as { rosters: RosterEntry[] };
-      setRosters(payload.rosters);
-      setIsAuthenticated(true);
-
-      if (!selectedRosterId && payload.rosters[0]) {
-        setSelectedRosterId(payload.rosters[0].id);
+        setRosters([]);
+        setSelectedRosterId(null);
+        setSummary(null);
+        setIsCheckingSession(false);
       }
     };
 
-    void syncRosters();
-  }, [selectedRosterId]);
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        setIsAuthenticated(false);
+        setIsCheckingSession(true);
+        setRosters([]);
+        setSelectedRosterId(null);
+        setSummary(null);
+        void resetAdminVisit();
+      }
+    };
+
+    void resetAdminVisit();
+    window.addEventListener("pageshow", handlePageShow);
+    return () => window.removeEventListener("pageshow", handlePageShow);
+  }, []);
 
   useEffect(() => {
     if (!selectedRosterId || !selectedDate) {
@@ -118,6 +127,10 @@ export function AdminPanel() {
 
   const handleLogin = async (event: React.FormEvent) => {
     event.preventDefault();
+    if (isCheckingSession) {
+      return;
+    }
+
     setBusy(true);
 
     const response = await fetch("/api/admin/login", {
@@ -294,6 +307,7 @@ export function AdminPanel() {
               <input
                 type="password"
                 value={password}
+                disabled={isCheckingSession}
                 onChange={(event) => setPassword(event.target.value)}
                 className="mt-2 w-full rounded-xl border border-slate-600 bg-slate-950 px-4 py-3 text-lg text-white outline-none ring-0"
                 placeholder="관리자 비밀번호"
@@ -301,10 +315,10 @@ export function AdminPanel() {
             </label>
             <button
               type="submit"
-              disabled={busy}
+              disabled={busy || isCheckingSession}
               className="w-full rounded-xl bg-cyan-500 px-4 py-3 text-lg font-bold text-slate-950 transition hover:bg-cyan-400 disabled:opacity-65"
             >
-              {busy ? "확인 중..." : "로그인"}
+              {isCheckingSession ? "접속 확인 중..." : busy ? "로그인 중..." : "로그인"}
             </button>
           </form>
           {message ? <p className="mt-4 text-sm text-amber-300">{message}</p> : null}
