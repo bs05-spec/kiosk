@@ -23,6 +23,7 @@ export function KioskScreen() {
   const [messageTone, setMessageTone] = useState<"neutral" | "success" | "error">(
     "neutral",
   );
+  const [completionMessage, setCompletionMessage] = useState("");
   const [now, setNow] = useState<Date | null>(null);
 
   const loadCurrentRoster = async () => {
@@ -70,6 +71,10 @@ export function KioskScreen() {
   );
 
   const handleKeyPress = (value: string) => {
+    if (completionMessage) {
+      return;
+    }
+
     if (value === "C") {
       setInput("");
       setMessage("학번을 다시 입력해 주세요.");
@@ -90,6 +95,10 @@ export function KioskScreen() {
   };
 
   const submitAttendance = async () => {
+    if (completionMessage) {
+      return;
+    }
+
     if (!roster) {
       setMessage("관리자가 먼저 출결 항목을 선택해 주세요.");
       setMessageTone("error");
@@ -121,16 +130,10 @@ export function KioskScreen() {
       return;
     }
 
-    setMessage(
+    setCompletionMessage(
       `${payload.studentName ?? "학생"}(${payload.studentNumber}) 출결이 완료되었습니다.`,
     );
-    setMessageTone("success");
-    setInput("");
-
-    window.setTimeout(() => {
-      setMessage(`${roster.name} 출결 항목 준비 중`);
-      setMessageTone("neutral");
-    }, 2200);
+    setMessageTone("neutral");
   };
 
   return (
@@ -179,9 +182,13 @@ export function KioskScreen() {
                   type="button"
                   onClick={() => handleKeyPress(value)}
                   data-action={value === "✓" ? "confirm" : value === "C" ? "clear" : "digit"}
-                  className="kiosk-key flex h-16 items-center justify-center rounded-2xl text-2xl font-semibold md:h-20 md:text-3xl"
+                  className="kiosk-key flex h-32 items-center justify-center rounded-2xl text-5xl font-semibold md:h-40 md:text-6xl"
                 >
-                  {value}
+                  {value === "C" ? (
+                    <span className="text-xl md:text-2xl">지우기</span>
+                  ) : (
+                    value
+                  )}
                 </button>
               ))}
             </div>
@@ -199,6 +206,36 @@ export function KioskScreen() {
           </div>
         </section>
       </div>
+      {completionMessage ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="attendance-complete-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 px-4"
+        >
+          <div className="w-full max-w-lg rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-2xl">
+            <h2 id="attendance-complete-title" className="text-xl font-semibold text-slate-500">
+              출결 완료
+            </h2>
+            <p className="mt-4 text-[2rem] font-bold text-emerald-700">
+              {completionMessage}
+            </p>
+            <button
+              type="button"
+              autoFocus
+              onClick={() => {
+                setCompletionMessage("");
+                setInput("");
+                setMessage("학번을 입력해 주세요.");
+                setMessageTone("neutral");
+              }}
+              className="mt-8 w-full rounded-2xl bg-cyan-500 px-6 py-4 text-xl font-bold text-white hover:bg-cyan-400"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      ) : null}
       <footer className="mt-auto pt-10 text-center">
         <Link
           href="/admin"
