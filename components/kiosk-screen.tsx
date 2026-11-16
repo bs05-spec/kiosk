@@ -165,7 +165,7 @@ export function KioskScreen() {
             </div>
 
             <div className="kiosk-number-panel rounded-2xl border border-slate-700 bg-slate-950/60 px-4 py-1 text-center md:py-2">
-              <p className="mb-2 text-xs uppercase tracking-[0.25em] text-slate-400">학생 번호</p>
+              <p className="mb-2 text-xs uppercase tracking-[0.25em] text-slate-400">학번 5자리 입력</p>
               <div className="flex flex-nowrap justify-center gap-2 whitespace-nowrap text-6xl font-semibold tabular-nums tracking-tight text-white md:gap-5 md:text-7xl">
                 {Array.from({ length: 5 }, (_, index) => (
                   <span key={index} className="w-[1ch] text-center">
@@ -175,17 +175,17 @@ export function KioskScreen() {
               </div>
             </div>
 
-            <div className="mt-6 grid grid-cols-3 gap-3 md:gap-4">
+            <div className="mt-6 grid grid-cols-3 gap-x-3 gap-y-12 md:gap-x-4 md:gap-y-14">
               {keypad.flat().map((value) => (
                 <button
                   key={value}
                   type="button"
                   onClick={() => handleKeyPress(value)}
                   data-action={value === "✓" ? "confirm" : value === "C" ? "clear" : "digit"}
-                  className="kiosk-key flex h-16 items-center justify-center rounded-2xl text-[4.5rem] font-semibold md:h-20 md:text-[5.625rem]"
+                  className="kiosk-key flex h-16 items-center justify-center rounded-2xl text-[6.75rem] font-semibold md:h-20 md:text-[8.4375rem]"
                 >
                   {value === "C" ? (
-                    <span className="text-[1.25rem] tracking-tight md:text-[2rem]">지우기</span>
+                    <span className="text-[1.875rem] tracking-tight md:text-[3rem]">지우기</span>
                   ) : (
                     value
                   )}
