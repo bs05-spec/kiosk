@@ -292,6 +292,14 @@ input:focus-visible {
   color: #a4261d !important;
 }
 
+.kiosk-admin-link {
+  color: #a1a1a6 !important;
+}
+
+.kiosk-admin-link:hover {
+  color: #6e6e73 !important;
+}
+
 .admin-auth-card {
   border: 1px solid rgb(29 29 31 / 6%) !important;
   background: #fff !important;

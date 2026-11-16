@@ -200,7 +200,7 @@ export function KioskScreen() {
       <footer className="mt-auto pt-10 text-center">
         <Link
           href="/admin"
-          className="text-xs font-medium tracking-[0.18em] text-slate-400 transition-colors hover:text-slate-600"
+          className="kiosk-admin-link text-xs font-medium tracking-[0.18em] transition-colors"
         >
           ADMIN
         </Link>
