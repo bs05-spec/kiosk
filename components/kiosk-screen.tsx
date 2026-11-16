@@ -139,6 +139,9 @@ export function KioskScreen() {
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-cyan-300">ATTEND KIOSK</p>
             <h1 className="mt-2 text-3xl font-bold">학생 출석 등록</h1>
+            <p className="mt-2 text-sm text-slate-600 md:text-base">
+              5자리 학번을 입력합니다. (예: 1학년 3반 1번이라면 10301 입력)
+            </p>
           </div>
           <div className="rounded-2xl border border-cyan-400/40 bg-cyan-500/10 px-5 py-3 text-right">
             <div className="text-xs uppercase tracking-[0.25em] text-cyan-200">Current Date</div>
@@ -159,8 +162,12 @@ export function KioskScreen() {
 
             <div className="rounded-2xl border border-slate-700 bg-slate-950/60 px-6 py-6 text-center">
               <p className="mb-3 text-sm uppercase tracking-[0.35em] text-slate-400">Student No.</p>
-              <div className="text-6xl font-black tracking-[0.5em] text-white md:text-7xl">
-                {input || "- - - - -"}
+              <div className="flex flex-nowrap justify-center gap-2 whitespace-nowrap text-6xl font-black text-white md:gap-4 md:text-7xl">
+                {Array.from({ length: 5 }, (_, index) => (
+                  <span key={index} className="w-[1ch] text-center">
+                    {input[index] ?? "−"}
+                  </span>
+                ))}
               </div>
             </div>
 
@@ -198,14 +205,6 @@ export function KioskScreen() {
               {message}
             </div>
 
-            <div className="mt-6 rounded-2xl border border-slate-700 bg-slate-950/60 p-4">
-              <p className="text-xs uppercase tracking-[0.3em] text-slate-400">Guide</p>
-              <ul className="mt-3 space-y-3 text-base text-slate-200">
-                <li>• 5자리 학번만 입력합니다.</li>
-                <li>• 출결 항목은 관리자 화면에서 선택합니다.</li>
-                <li>• 등록 후 자동으로 초기화됩니다.</li>
-              </ul>
-            </div>
           </aside>
         </section>
       </div>
