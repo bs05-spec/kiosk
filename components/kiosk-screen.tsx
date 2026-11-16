@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 
 type Student = {
@@ -133,7 +134,7 @@ export function KioskScreen() {
   };
 
   return (
-    <main className="kiosk-page min-h-screen bg-slate-950 px-5 py-8 text-white md:px-8">
+    <main className="kiosk-page flex min-h-screen flex-col bg-slate-950 px-5 py-8 text-white md:px-8">
       <div className="mx-auto flex max-w-5xl flex-col gap-12">
         <header className="kiosk-header flex items-center justify-between gap-6">
           <div>
@@ -196,6 +197,14 @@ export function KioskScreen() {
           </div>
         </section>
       </div>
+      <footer className="mt-auto pt-10 text-center">
+        <Link
+          href="/admin"
+          className="text-xs font-medium tracking-[0.18em] text-slate-400 transition-colors hover:text-slate-600"
+        >
+          ADMIN
+        </Link>
+      </footer>
     </main>
   );
 }
